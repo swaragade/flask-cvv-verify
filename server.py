@@ -1,16 +1,26 @@
 from flask import Flask, request, Response
 import sys
 import os
-from sys import platform
 import socket
 import logging
+import xmltodict
 
 # creating a Flask app 
 app = Flask(__name__)
 
 @app.route("/")
 def hello():
-    return "<h1>App is up</h1>"
+    return "<h1>App is up, hit POST with XML for CVV validation</h1>"
+
+@app.route("/" , methods = ['POST'])
+def validate_cvv_post():
+    xml_request=xmltodict.parse(request.data)
+    #app.logger.info(xml_request)
+    cvv_val = xml_request["params"]["param"]["@value"]
+    app.logger.info(cvv_val)
+
+    xml = response(int(cvv_val))
+    return Response(xml, mimetype='text/xml')
 
 @app.route("/<int:cvv>" , methods = ['GET'])
 def validate_cvv(cvv):

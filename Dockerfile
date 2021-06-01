@@ -7,8 +7,6 @@ RUN apt-get update \
     -y libxrender-dev \
     && rm -rf /var/lib/apt/lists/*
 
-#WORKDIR /usr/src/app
-
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -19,3 +17,5 @@ EXPOSE 8000
 CMD ["python3", "./server.py"]
 
 #docker build -t ruby2py . && docker run -p 8000:8000 ruby2py
+#docker images | grep none | awk '{print $3} ' | xargs docker rmi -f
+#curl -X POST -d @input.xml  -H 'Content-Type: text/xml' http://localhost:8000
