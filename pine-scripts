@@ -27,3 +27,41 @@ strategy.close("long", id="exit", when = short)
 
 
 //===============
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © surajwaragade
+
+//@version=5
+strategy('SUPERTREND_ADX', overlay=true)
+//this is with rsi.. we may think of ranking system in this
+riskAmount = input.int(defval=1000, title='Risk Per Trade(Rs)', minval=100)
+// get data
+superTrendMultiplier = input.int(defval=3, title='Super Trend Multiplier', minval=1)
+superTrendATR = input.int(defval=10, title='Super Trend ATR Rate', minval=1)
+[superTrend, dir] = ta.supertrend(superTrendMultiplier, superTrendATR)
+//plot(series=superTrend, title='super10', color=color.new(#00ffaa, 0))
+adxInput = input.int(defval=14, title='ADX', minval=1)
+[diplus, diminus, adx] = ta.dmi(adxInput, adxInput)
+rsi = ta.rsi(close,14)
+//plot(series=rsi, title='rsi', color=color.yellow)
+
+// calculation
+emaInput = input.int(defval=21, title='EMA', minval=1)
+ema1hr = ta.ema(close, emaInput)
+long = ta.crossover(close[1], superTrend) and diplus > diminus and diplus >= 25 and close[1] >= ema1hr and rsi >=30
+closePos = close <= superTrend or low <= superTrend
+positionSize = riskAmount / math.abs(close - superTrend)
+
+short = ta.crossover(superTrend, close[1]) and diminus > diplus and diminus >= 25 and close[1] <= ema1hr and rsi <= 70
+
+closeShort = close >= superTrend or low >= superTrend
+// position long
+afterStartDate = true  //(time >= timestamp(syminfo.timezone,2021, 10, 1, 0, 0))
+if afterStartDate and positionSize > 0
+    strategy.entry('long', strategy.long, positionSize, when=long)
+    // position short
+    strategy.entry('short', strategy.short, positionSize, when=short)
+strategy.close('long', when=closePos)
+strategy.close('short', when=closeShort)
+
+
+
